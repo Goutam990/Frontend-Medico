@@ -1,3 +1,10 @@
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  // Other patient details can be added here as needed
+}
+
 export interface Booking {
   id: string;
   patientName: string;
