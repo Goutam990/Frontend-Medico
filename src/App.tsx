@@ -16,7 +16,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/admin/Patients" replace />} />
         <Route path="/register" element={<Register />} />
 
         <Route path="/patient/dashboard" element={<PatientDashboard />} />
@@ -29,7 +29,7 @@ function App() {
         <Route path="/admin/calendar" element={<CalendarView />} />
         <Route path="/admin/settings" element={<Settings />} />
 
-        <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/admin/Patients" replace />} />
       </Routes>
     </Router>
   );

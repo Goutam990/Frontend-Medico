@@ -18,8 +18,8 @@ export default function Navbar() {
                 to="/admin/dashboard"
                 className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition"
               >
-                <LayoutDashboard className="h-4 w-4 mr-2" />
-                Dashboard
+                {/* <LayoutDashboard className="h-4 w-4 mr-2" /> */}
+                {/* Dashboard */}
               </Link>
               <Link
                 to="/admin/patients"
