@@ -5,12 +5,10 @@ import type { User } from '../types';
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
   isAuthenticated: boolean;
-  isDoctor: boolean;
-  isPatient: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,27 +19,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Since we don't have an endpoint to verify the token, we'll assume it's valid if it exists.
+    // In a real-world application, you would make an API call here to get the user's data.
     if (token) {
-      authApi
-        .getCurrentUser()
-        .then((res) => setUser(res.data))
-        .catch(() => {
-          localStorage.removeItem('authToken');
-          setToken(null);
-        })
-        .finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
+      // For now, we can create a placeholder user object if a token is present.
+      // This part would be replaced by an API call to a `/api/auth/me` endpoint.
+      setUser({ id: '-1', username: 'Authenticated User', email: '' });
     }
+    setIsLoading(false);
   }, [token]);
 
-  const login = async (email: string, password: string) => {
-    const response = await authApi.login(email, password);
-    const { token: newToken, user: newUser } = response.data;
+  const login = async (username: string, password: string) => {
+    const response = await authApi.login({ username, password });
+    // The new API returns the token directly, not nested in a data object.
+    const newToken = response.data.token;
 
     localStorage.setItem('authToken', newToken);
     setToken(newToken);
-    setUser(newUser);
+
+    // Since the login endpoint doesn't return a user object,
+    // we cannot set the user here. A call to a 'get current user' endpoint would be needed.
+    // For now, we will leave the user as null.
+    // setUser(newUser);
   };
 
   const logout = () => {
@@ -56,9 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     logout,
     isLoading,
-    isAuthenticated: !!user,
-    isDoctor: user?.role === 'Doctor',
-    isPatient: user?.role === 'Patient',
+    isAuthenticated: !!token,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

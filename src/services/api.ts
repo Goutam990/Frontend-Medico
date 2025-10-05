@@ -1,7 +1,7 @@
 import axios from 'axios';
-import type { Booking } from '../types';
+import type { User, Booking } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5020';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5020/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -18,41 +18,26 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-
-export const bookingApi = {
-  // POST /api/Appointment/CreateNewAppointment
-  create: (data: {
-    patientName: string;
-    age: number;
-    gender: string;
-    appointmentDate: string;
-    appointmentTime: string;
-    phoneNumber: string;
-    address: string;
-  }) => {
-    return api.post<Booking>('/api/Appointment/CreateNewAppointment', data);
-  },
-
-  // GET /api/Appointment/GetAllAppointment
-  getAll: () => api.get<Booking[]>('/api/Appointment/GetAllAppointment'),
-
-  // GET /api/Appointment/GetDoneAppointment
-  getDone: () => api.get<Booking[]>('/api/Appointment/GetDoneAppointment'),
-
-  // PUT /api/Appointment/{appointmentId}/status
-  updateStatus: (id: string, status: string) =>
-    api.put(`/api/Appointment/${id}/status`, { status }),
-
-  // NOTE: The following endpoints might not be supported by the new backend.
-  getById: (id: string) => api.get<Booking>(`/bookings/${id}`),
-
-  getMyBookings: () => api.get<Booking[]>('/bookings/my-bookings'),
-
-  cancel: (id: string) => api.patch<Booking>(`/bookings/${id}/cancel`),
-
-  getCalendarBookings: (start?: string, end?: string) =>
-    api.get<Booking[]>('/bookings/calendar', { params: { start, end } }),
+export const authApi = {
+  register: (data: any) => api.post('/auth/register', data),
+  login: (data: any) => api.post('/auth/login', data),
 };
 
+export const patientApi = {
+  getAll: () => api.get('/patient'),
+  getById: (id: string) => api.get(`/patient/${id}`),
+  create: (data: any) => api.post('/patient', data),
+  update: (id: string, data: any) => api.put(`/patient/${id}`, data),
+  delete: (id: string) => api.delete(`/patient/${id}`),
+};
+
+export const bookingApi = {
+  create: (data: any) => api.post('/appointment/CreateNewAppointment', data),
+  getAll: () => api.get('/appointment/GetAllAppointment'),
+  getDone: () => api.get('/appointment/GetDoneAppointment'),
+  updateStatus: (id: string, status: string) => api.put(`/appointment/${id}/status`, { status }),
+};
+
+// Enquiry and other APIs can be added here if needed
 
 export default api;
