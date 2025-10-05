@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Navbar from '../../components/Navbar';
 import { bookingApi } from '../../services/api';
-import { Calendar, CheckCircle, XCircle, CreditCard as Edit } from 'lucide-react';
+import { CheckCircle, XCircle, CreditCard as Edit } from 'lucide-react';
 import type { Booking } from '../../types';
 import Swal from 'sweetalert2';
 import DataTable from 'datatables.net-dt';
@@ -40,7 +40,7 @@ export default function Bookings() {
   const loadBookings = async () => {
     try {
       const response = await bookingApi.getAll();
-      setBookings(response.data.data);
+      setBookings(response.data);
     } catch (error) {
       console.error('Error loading bookings:', error);
     } finally {
@@ -49,34 +49,18 @@ export default function Bookings() {
   };
 
   const handleApprove = async (booking: Booking) => {
-    const { value: formValues } = await Swal.fire({
+    const result = await Swal.fire({
       title: 'Approve Booking',
-      html: `
-        <div class="text-left">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Time Slot (Optional)</label>
-          <input id="timeSlot" class="swal2-input" placeholder="Enter new time slot" value="${booking.timeSlot}">
-          <label class="block text-sm font-medium text-gray-700 mb-2 mt-4">Comments (Optional)</label>
-          <textarea id="comments" class="swal2-textarea" placeholder="Add comments"></textarea>
-        </div>
-      `,
+      text: `Are you sure you want to approve this appointment for ${booking.patientName}?`,
+      icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Approve',
       confirmButtonColor: '#3B82F6',
-      preConfirm: () => {
-        return {
-          timeSlot: (document.getElementById('timeSlot') as HTMLInputElement).value,
-          notes: (document.getElementById('comments') as HTMLTextAreaElement).value,
-        };
-      },
     });
 
-    if (formValues) {
+    if (result.isConfirmed) {
       try {
-        await bookingApi.updateStatus(booking.id, 'Approved', {
-          timeSlot: formValues.timeSlot || booking.timeSlot,
-          notes: formValues.notes || booking.notes,
-        });
-
+        await bookingApi.updateStatus(booking.id, 'Approved');
         Swal.fire({
           icon: 'success',
           title: 'Booking Approved',
@@ -84,7 +68,6 @@ export default function Bookings() {
           timer: 2000,
           showConfirmButton: false,
         });
-
         loadBookings();
       } catch (error: any) {
         Swal.fire({
@@ -97,25 +80,18 @@ export default function Bookings() {
   };
 
   const handleReject = async (booking: Booking) => {
-    const { value: rejectionReason } = await Swal.fire({
+    const result = await Swal.fire({
       title: 'Reject Booking',
-      input: 'textarea',
-      inputLabel: 'Rejection Reason',
-      inputPlaceholder: 'Enter the reason for rejection...',
+      text: `Are you sure you want to reject this appointment for ${booking.patientName}?`,
+      icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Reject',
       confirmButtonColor: '#EF4444',
-      inputValidator: (value) => {
-        if (!value) {
-          return 'Please provide a reason for rejection';
-        }
-      },
     });
 
-    if (rejectionReason) {
+    if (result.isConfirmed) {
       try {
-        await bookingApi.updateStatus(booking.id, 'Rejected', { rejectionReason });
-
+        await bookingApi.updateStatus(booking.id, 'Rejected');
         Swal.fire({
           icon: 'success',
           title: 'Booking Rejected',
@@ -123,7 +99,6 @@ export default function Bookings() {
           timer: 2000,
           showConfirmButton: false,
         });
-
         loadBookings();
       } catch (error: any) {
         Swal.fire({
@@ -138,25 +113,23 @@ export default function Bookings() {
   const handleComplete = async (booking: Booking) => {
     const result = await Swal.fire({
       icon: 'question',
-      title: 'Mark as Complete',
-      text: 'Are you sure you want to mark this booking as complete?',
+      title: 'Mark as Done',
+      text: 'Are you sure you want to mark this booking as done?',
       showCancelButton: true,
-      confirmButtonText: 'Yes, Complete',
+      confirmButtonText: 'Yes, Mark as Done',
       confirmButtonColor: '#10B981',
     });
 
     if (result.isConfirmed) {
       try {
-        await bookingApi.updateStatus(booking.id, 'Complete');
-
+        await bookingApi.updateStatus(booking.id, 'Done');
         Swal.fire({
           icon: 'success',
           title: 'Booking Completed',
-          text: 'The booking has been marked as complete',
+          text: 'The booking has been marked as done',
           timer: 2000,
           showConfirmButton: false,
         });
-
         loadBookings();
       } catch (error: any) {
         Swal.fire({
@@ -181,7 +154,7 @@ export default function Bookings() {
         return 'bg-red-100 text-red-800';
       case 'Cancelled':
         return 'bg-orange-100 text-orange-800';
-      case 'Complete':
+      case 'Done':
         return 'bg-green-100 text-green-800';
       default:
         return 'bg-yellow-100 text-yellow-800';
@@ -202,13 +175,11 @@ export default function Bookings() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Booking Management</h1>
           <p className="mt-2 text-gray-600">Manage and approve patient appointments</p>
         </div>
-
         <div className="bg-white rounded-lg shadow">
           <div className="p-6">
             <div className="overflow-x-auto">
@@ -216,11 +187,10 @@ export default function Bookings() {
                 <thead>
                   <tr>
                     <th>Patient Name</th>
-                    <th>Date</th>
-                    <th>Time Slot</th>
+                    <th>Appointment Date</th>
+                    <th>Appointment Time</th>
+                    <th>Phone Number</th>
                     <th>Status</th>
-                    <th>Payment</th>
-                    <th>Created On</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -228,23 +198,18 @@ export default function Bookings() {
                   {bookings.map((booking) => (
                     <tr key={booking.id}>
                       <td>{booking.patientName}</td>
-                      <td>{new Date(booking.date).toLocaleDateString()}</td>
-                      <td>{booking.timeSlot}</td>
+                      <td>{new Date(booking.appointmentDate).toLocaleDateString()}</td>
+                      <td>{booking.appointmentTime}</td>
+                      <td>{booking.phoneNumber}</td>
                       <td>
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
+                        <span
+                          className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                            booking.status
+                          )}`}
+                        >
                           {booking.status}
                         </span>
                       </td>
-                      <td>
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          booking.paymentStatus === 'Paid'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {booking.paymentStatus}
-                        </span>
-                      </td>
-                      <td>{new Date(booking.createdAt).toLocaleDateString()}</td>
                       <td>
                         <div className="flex items-center space-x-2">
                           <button
@@ -277,7 +242,7 @@ export default function Bookings() {
                               onClick={() => handleComplete(booking)}
                               className="px-3 py-1 text-xs bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                             >
-                              Complete
+                              Mark as Done
                             </button>
                           )}
                         </div>
@@ -303,58 +268,52 @@ export default function Bookings() {
                 ×
               </button>
             </div>
-
             <div className="p-6 space-y-4">
               <div>
                 <p className="text-sm font-medium text-gray-500">Patient Name</p>
                 <p className="text-lg text-gray-900">{selectedBooking.patientName}</p>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Date</p>
-                  <p className="text-gray-900">{new Date(selectedBooking.date).toLocaleDateString()}</p>
+                  <p className="text-sm font-medium text-gray-500">Age</p>
+                  <p className="text-gray-900">{selectedBooking.age}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Time Slot</p>
-                  <p className="text-gray-900">{selectedBooking.timeSlot}</p>
+                  <p className="text-sm font-medium text-gray-500">Gender</p>
+                  <p className="text-gray-900">{selectedBooking.gender}</p>
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Status</p>
-                  <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedBooking.status)}`}>
-                    {selectedBooking.status}
-                  </span>
+                  <p className="text-sm font-medium text-gray-500">Appointment Date</p>
+                  <p className="text-gray-900">
+                    {new Date(selectedBooking.appointmentDate).toLocaleDateString()}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Payment Status</p>
-                  <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${
-                    selectedBooking.paymentStatus === 'Paid'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {selectedBooking.paymentStatus}
-                  </span>
+                  <p className="text-sm font-medium text-gray-500">Appointment Time</p>
+                  <p className="text-gray-900">{selectedBooking.appointmentTime}</p>
                 </div>
               </div>
-
-              {selectedBooking.notes && (
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Notes</p>
-                  <p className="text-gray-900 mt-1">{selectedBooking.notes}</p>
-                </div>
-              )}
-
-              {selectedBooking.rejectionReason && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm font-medium text-gray-500">Rejection Reason</p>
-                  <p className="text-red-800 mt-1">{selectedBooking.rejectionReason}</p>
-                </div>
-              )}
+              <div>
+                <p className="text-sm font-medium text-gray-500">Phone Number</p>
+                <p className="text-gray-900">{selectedBooking.phoneNumber}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Address</p>
+                <p className="text-gray-900">{selectedBooking.address}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Status</p>
+                <span
+                  className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                    selectedBooking.status
+                  )}`}
+                >
+                  {selectedBooking.status}
+                </span>
+              </div>
             </div>
-
             <div className="p-6 border-t flex justify-end space-x-4">
               <button
                 onClick={() => setShowDetailsModal(false)}
@@ -392,7 +351,7 @@ export default function Bookings() {
                   }}
                   className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                 >
-                  Mark Complete
+                  Mark as Done
                 </button>
               )}
             </div>
