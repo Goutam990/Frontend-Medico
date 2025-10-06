@@ -1,5 +1,4 @@
 import axios from 'axios';
-import type { User, Booking } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5020/api';
 
@@ -10,8 +9,9 @@ const api = axios.create({
   },
 });
 
+// Add a request interceptor to include the token in headers for all protected API calls
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -19,25 +19,33 @@ api.interceptors.request.use((config) => {
 });
 
 export const authApi = {
-  register: (data: any) => api.post('/auth/register', data),
-  login: (data: any) => api.post('/auth/login', data),
+  // POST /api/auth/register
+  register: (userData: any) => api.post('/auth/register', userData),
+
+  // POST /api/auth/login
+  login: (credentials: any) => api.post('/auth/login', credentials),
+
+  // POST /api/auth/logout
+  logout: () => api.post('/auth/logout'),
 };
 
-export const patientApi = {
-  getAll: () => api.get('/patient'),
-  getById: (id: string) => api.get(`/patient/${id}`),
-  create: (data: any) => api.post('/patient', data),
-  update: (id: string, data: any) => api.put(`/patient/${id}`, data),
-  delete: (id: string) => api.delete(`/patient/${id}`),
+export const userApi = {
+    // GET /api/users
+    getAll: () => api.get('/users'),
 };
 
-export const bookingApi = {
-  create: (data: any) => api.post('/appointment/CreateNewAppointment', data),
-  getAll: () => api.get('/appointment/GetAllAppointment'),
-  getDone: () => api.get('/appointment/GetDoneAppointment'),
-  updateStatus: (id: string, status: string) => api.put(`/appointment/${id}/status`, { status }),
-};
+export const appointmentApi = {
+  // GET /api/appointments
+  getAll: () => api.get('/appointments'),
 
-// Enquiry and other APIs can be added here if needed
+  // POST /api/appointments
+  create: (appointmentData: any) => api.post('/appointments', appointmentData),
+
+  // PUT /api/appointments/{id}
+  update: (id: string, appointmentData: any) => api.put(`/appointments/${id}`, appointmentData),
+
+  // DELETE /api/appointments/{id}
+  delete: (id: string) => api.delete(`/appointments/${id}`),
+};
 
 export default api;

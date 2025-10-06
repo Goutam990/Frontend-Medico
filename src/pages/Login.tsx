@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Calendar, User, Lock } from 'lucide-react';
+import { Calendar, Mail, Lock } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 export default function Login() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isDoctor } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,7 +16,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      await login(username, password);
+      await login(email, password);
 
       Swal.fire({
         icon: 'success',
@@ -26,15 +26,14 @@ export default function Login() {
         showConfirmButton: false,
       });
 
-      // Since the new API doesn't provide user roles, we redirect to a default page.
       setTimeout(() => {
-        navigate('/admin/bookings');
+        navigate(isDoctor ? '/admin/dashboard' : '/patient/dashboard');
       }, 1500);
     } catch (error: any) {
       Swal.fire({
         icon: 'error',
         title: 'Login Failed',
-        text: error.response?.data?.message || 'Invalid username or password',
+        text: error.response?.data?.message || 'Invalid email or password',
       });
     } finally {
       setIsLoading(false);
@@ -55,21 +54,21 @@ export default function Login() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                Username
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email Address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
+                  <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  id="username"
-                  type="text"
+                  id="email"
+                  type="email"
                   required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  placeholder="your-username"
+                  placeholder="you@example.com"
                 />
               </div>
             </div>

@@ -1,9 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Calendar, Settings, Users, LayoutDashboard, LogOut } from 'lucide-react';
+import { Calendar, Users, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Navbar() {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -27,20 +27,25 @@ export default function Navbar() {
                 className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition"
               >
                 <Users className="h-4 w-4 mr-2" />
-                Patients
+                Users
               </Link>
               <Link
                 to="/admin/bookings"
                 className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition"
               >
                 <Calendar className="h-4 w-4 mr-2" />
-                Bookings
+                Appointments
               </Link>
-              {/* Other links can be restored here if their pages are re-enabled */}
             </div>
           </div>
 
           <div className="flex items-center space-x-4">
+            {user && (
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900">{`${user.firstName} ${user.lastName}`}</p>
+                <p className="text-xs text-gray-500">{user.role}</p>
+              </div>
+            )}
             <button
               onClick={handleLogout}
               className="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition"

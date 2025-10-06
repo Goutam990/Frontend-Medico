@@ -1,8 +1,9 @@
 export interface User {
   id: string;
-  username: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  // Other patient details can be added here as needed
+  role: 'Patient' | 'Doctor';
 }
 
 export interface Booking {
