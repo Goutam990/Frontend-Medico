@@ -5,39 +5,41 @@ import type { User } from '../types';
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (username: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isDoctor: boolean;
+  isPatient: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('authToken'));
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    // In a real-world application, you would make an API call here to verify the token
-    // and get the user's data. Since the current backend does not support a 'get me' endpoint,
-    // we will simply finish loading and rely on the token's presence for authentication.
-    setIsLoading(false);
-  }, [token]);
+  const login = async (email: string, password: string) => {
+    const response = await authApi.login({ email, password });
+    const { token: newToken, user: newUser } = response.data;
 
-  const login = async (username: string, password: string) => {
-    const response = await authApi.login({ username, password });
-    const newToken = response.data.token;
-
-    localStorage.setItem('authToken', newToken);
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
-
-    // The user object is not returned from the login endpoint, so we leave it as null.
-    // The application should rely on `isAuthenticated` for protecting routes.
+    setUser(newUser);
   };
 
-  const logout = () => {
-    localStorage.removeItem('authToken');
+  const logout = async () => {
+    // We can call the logout endpoint, but we don't need to wait for it.
+    // The user should be logged out on the client immediately.
+    authApi.logout().catch(err => console.error("Logout API call failed", err));
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
   };
@@ -48,7 +50,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     logout,
     isLoading,
-    isAuthenticated: !!token,
+    isAuthenticated: !!user && !!token,
+    isDoctor: user?.role === 'Doctor',
+    isPatient: user?.role === 'Patient',
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
