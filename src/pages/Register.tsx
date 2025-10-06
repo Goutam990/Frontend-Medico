@@ -45,6 +45,7 @@ export default function Register() {
       });
 
       setTimeout(() => {
+        console.log("Navigating to login page...");
         navigate('/login');
       }, 2000);
     } catch (error: any) {
