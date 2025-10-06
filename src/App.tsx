@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import PatientDashboard from './pages/patient/Dashboard';
@@ -8,25 +8,61 @@ import Patients from './pages/admin/Patients';
 import Bookings from './pages/admin/Bookings';
 import ProtectedRoute from './components/ProtectedRoute';
 
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        <Route path="/patient/dashboard" element={<ProtectedRoute><PatientDashboard /></ProtectedRoute>} />
-        <Route path="/patient/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
-        <Route path="/patient/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-
-        <Route path="/admin/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
-        <Route path="/admin/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
-
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-    </Router>
-  );
-}
-
-export default App;
+export const router = createBrowserRouter([
+  {
+    path: '/login',
+    element: <Login />,
+  },
+  {
+    path: '/register',
+    element: <Register />,
+  },
+  {
+    path: '/patient/dashboard',
+    element: (
+      <ProtectedRoute>
+        <PatientDashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/patient/bookings',
+    element: (
+      <ProtectedRoute>
+        <MyBookings />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/patient/profile',
+    element: (
+      <ProtectedRoute>
+        <Profile />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin/patients',
+    element: (
+      <ProtectedRoute>
+        <Patients />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin/bookings',
+    element: (
+      <ProtectedRoute>
+        <Bookings />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/',
+    element: <Navigate to="/login" replace />,
+  },
+  {
+    path: '*',
+    element: <Navigate to="/login" replace />,
+  },
+]);
