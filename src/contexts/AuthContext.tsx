@@ -19,28 +19,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Since we don't have an endpoint to verify the token, we'll assume it's valid if it exists.
-    // In a real-world application, you would make an API call here to get the user's data.
-    if (token) {
-      // For now, we can create a placeholder user object if a token is present.
-      // This part would be replaced by an API call to a `/api/auth/me` endpoint.
-      setUser({ id: '-1', username: 'Authenticated User', email: '' });
-    }
+    // In a real-world application, you would make an API call here to verify the token
+    // and get the user's data. Since the current backend does not support a 'get me' endpoint,
+    // we will simply finish loading and rely on the token's presence for authentication.
     setIsLoading(false);
   }, [token]);
 
   const login = async (username: string, password: string) => {
     const response = await authApi.login({ username, password });
-    // The new API returns the token directly, not nested in a data object.
     const newToken = response.data.token;
 
     localStorage.setItem('authToken', newToken);
     setToken(newToken);
 
-    // Since the login endpoint doesn't return a user object,
-    // we cannot set the user here. A call to a 'get current user' endpoint would be needed.
-    // For now, we will leave the user as null.
-    // setUser(newUser);
+    // The user object is not returned from the login endpoint, so we leave it as null.
+    // The application should rely on `isAuthenticated` for protecting routes.
   };
 
   const logout = () => {
