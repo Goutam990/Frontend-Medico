@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
 import { authApi } from '../services/api';
 import type { User } from '../types';
 
@@ -16,14 +16,21 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    const storedUser = localStorage.getItem('user');
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
-  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = async (email: string, password: string) => {
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    if (storedToken && storedUser) {
+      setToken(storedToken);
+      setUser(JSON.parse(storedUser));
+    }
+    setIsLoading(false);
+  }, []);
+
+  const login = useCallback(async (email: string, password: string) => {
     const response = await authApi.login({ email, password });
     const { token: newToken, user: newUser } = response.data;
 
@@ -32,29 +39,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(newToken);
     setUser(newUser);
     return newUser;
-  };
+  }, []);
 
-  const logout = async () => {
-    // We can call the logout endpoint, but we don't need to wait for it.
-    // The user should be logged out on the client immediately.
+  const logout = useCallback(async () => {
     authApi.logout().catch(err => console.error("Logout API call failed", err));
-
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setToken(null);
     setUser(null);
-  };
+  }, []);
 
-  const value = {
-    user,
-    token,
-    login,
-    logout,
-    isLoading,
-    isAuthenticated: !!user && !!token,
-    isDoctor: user?.role === 'Doctor',
-    isPatient: user?.role === 'Patient',
-  };
+  const value = useMemo(
+    () => ({
+      user,
+      token,
+      login,
+      logout,
+      isLoading,
+      isAuthenticated: !!user && !!token,
+      isDoctor: user?.role === 'Doctor',
+      isPatient: user?.role === 'Patient',
+    }),
+    [user, token, isLoading]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

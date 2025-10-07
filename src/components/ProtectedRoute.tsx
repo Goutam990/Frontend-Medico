@@ -27,11 +27,11 @@ export default function ProtectedRoute({
   }
 
   if (requireDoctor && !isDoctor) {
-    return <Navigate to="/patient/dashboard" replace />;
+    return <Navigate to="/patient/bookings" replace />;
   }
 
   if (requirePatient && !isPatient) {
-    return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to="/admin/bookings" replace />;
   }
 
   return <>{children}</>;
