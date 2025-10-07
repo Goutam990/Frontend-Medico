@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useMemo, useCallback } from 'react';
 import { authApi } from '../services/api';
 import type { User } from '../types';
 
@@ -7,7 +7,6 @@ interface AuthContextType {
   token: string | null;
   login: (email: string, password: string) => Promise<User>;
   logout: () => void;
-  isLoading: boolean;
   isAuthenticated: boolean;
   isDoctor: boolean;
   isPatient: boolean;
@@ -16,19 +15,13 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const storedToken = localStorage.getItem('token');
+  // Initialize state synchronously from localStorage. This removes the need for a
+  // useEffect and isLoading state, which was the source of the redirect loop.
+  const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem('user');
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
-  }, []);
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
 
   const login = useCallback(async (email: string, password: string) => {
     const response = await authApi.login({ email, password });
@@ -41,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return newUser;
   }, []);
 
-  const logout = useCallback(async () => {
+  const logout = useCallback(() => {
     authApi.logout().catch(err => console.error("Logout API call failed", err));
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -55,12 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       token,
       login,
       logout,
-      isLoading,
       isAuthenticated: !!user && !!token,
       isDoctor: user?.role === 'Doctor',
       isPatient: user?.role === 'Patient',
     }),
-    [user, token, isLoading]
+    [user, token, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
