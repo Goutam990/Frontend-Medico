@@ -12,19 +12,10 @@ export default function ProtectedRoute({
   requireDoctor,
   requirePatient,
 }: ProtectedRouteProps) {
-  const { isAuthenticated, isDoctor, isPatient, isLoading } = useAuth();
+  const { isAuthenticated, isDoctor, isPatient } = useAuth();
 
-  // First, handle the loading state. This is the critical fix to prevent
-  // the component from redirecting before the auth status is known.
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  // Once loading is complete, we can safely check for authentication.
+  // With the AuthProvider loading synchronously, we can now safely check
+  // for authentication on the first render without an isLoading state.
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
