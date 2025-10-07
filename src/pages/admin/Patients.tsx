@@ -8,22 +8,22 @@ import DataTable from 'datatables.net-dt';
 import 'datatables.net-dt/css/dataTables.dataTables.css';
 
 export default function Patients() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [patients, setPatients] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<User | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const tableRef = useRef<HTMLTableElement>(null);
   const dataTableRef = useRef<any>(null);
 
   useEffect(() => {
-    loadUsers();
+    loadPatients();
   }, []);
 
   useEffect(() => {
     if (dataTableRef.current) {
       dataTableRef.current.destroy();
     }
-    if (users.length > 0 && tableRef.current) {
+    if (patients.length > 0 && tableRef.current) {
       dataTableRef.current = new DataTable(tableRef.current, {
         pageLength: 10,
         ordering: true,
@@ -32,26 +32,28 @@ export default function Patients() {
         destroy: true,
       });
     }
-  }, [users]);
+  }, [patients]);
 
-  const loadUsers = async () => {
+  const loadPatients = async () => {
     try {
       const response = await userApi.getAll();
-      setUsers(response.data);
+      // Filter the response to only include users with the 'Patient' role
+      const patientUsers = response.data.filter((user: User) => user.role === 'Patient');
+      setPatients(patientUsers);
     } catch (error) {
-      console.error('Error loading users:', error);
+      console.error('Error loading patients:', error);
       Swal.fire({
         icon: 'error',
         title: 'Loading Failed',
-        text: 'Could not load users from the server.',
+        text: 'Could not load patients from the server.',
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleViewProfile = (user: User) => {
-    setSelectedUser(user);
+  const handleViewProfile = (patient: User) => {
+    setSelectedPatient(patient);
     setShowProfileModal(true);
   };
 
@@ -72,8 +74,8 @@ export default function Patients() {
 
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-          <p className="mt-2 text-gray-600">View all registered users</p>
+          <h1 className="text-3xl font-bold text-gray-900">Registered Patient List</h1>
+          <p className="mt-2 text-gray-600">A list of all registered users with the "patient" role.</p>
         </div>
 
         <div className="bg-white rounded-lg shadow">
@@ -82,21 +84,19 @@ export default function Patients() {
               <table ref={tableRef} className="display w-full">
                 <thead>
                   <tr>
-                    <th>Name</th>
+                    <th>Patient Name</th>
                     <th>Email</th>
-                    <th>Role</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => (
-                    <tr key={user.id}>
-                      <td>{`${user.firstName} ${user.lastName}`}</td>
-                      <td>{user.email}</td>
-                      <td>{user.role}</td>
+                  {patients.map((patient) => (
+                    <tr key={patient.id}>
+                      <td>{`${patient.firstName} ${patient.lastName}`}</td>
+                      <td>{patient.email}</td>
                       <td>
                         <button
-                          onClick={() => handleViewProfile(user)}
+                          onClick={() => handleViewProfile(patient)}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                           title="View Profile"
                         >
@@ -112,11 +112,11 @@ export default function Patients() {
         </div>
       </div>
 
-      {showProfileModal && selectedUser && (
+      {showProfileModal && selectedPatient && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
             <div className="flex items-center justify-between p-6 border-b">
-              <h2 className="text-2xl font-bold text-gray-900">User Profile</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Patient Profile</h2>
               <button onClick={() => setShowProfileModal(false)} className="text-gray-400 hover:text-gray-600 transition">
                 ×
               </button>
@@ -125,15 +125,15 @@ export default function Patients() {
             <div className="p-6 space-y-4">
               <div>
                 <p className="text-sm font-medium text-gray-500">Full Name</p>
-                <p className="text-lg text-gray-900">{`${selectedUser.firstName} ${selectedUser.lastName}`}</p>
+                <p className="text-lg text-gray-900">{`${selectedPatient.firstName} ${selectedPatient.lastName}`}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Email</p>
-                <p className="text-lg text-gray-900">{selectedUser.email}</p>
+                <p className="text-lg text-gray-900">{selectedPatient.email}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Role</p>
-                <p className="text-lg text-gray-900">{selectedUser.role}</p>
+                <p className="text-lg text-gray-900">{selectedPatient.role}</p>
               </div>
             </div>
 
