@@ -30,10 +30,22 @@ export default function BookingModal({ onClose, onSuccess }: BookingModalProps) 
     setIsLoading(true);
 
     try {
-      await appointmentApi.create({
+      // Calculate endTime: 1 hour after appointmentTime
+      const { appointmentDate, appointmentTime } = formData;
+      const startTime = new Date(`${appointmentDate}T${appointmentTime}`);
+      const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // Add 1 hour in milliseconds
+
+      const endHours = String(endTime.getHours()).padStart(2, '0');
+      const endMinutes = String(endTime.getMinutes()).padStart(2, '0');
+      const endTimeString = `${endHours}:${endMinutes}`;
+
+      const appointmentData = {
         ...formData,
         age: Number(formData.age),
-      });
+        endTime: endTimeString, // Add the calculated end time
+      };
+
+      await appointmentApi.create(appointmentData);
 
       Swal.fire({
         icon: 'success',
