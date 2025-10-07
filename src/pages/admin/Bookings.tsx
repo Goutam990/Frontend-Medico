@@ -144,9 +144,11 @@ export default function Bookings() {
                 <thead>
                   <tr>
                     <th>Patient Name</th>
-                    <th>Appointment Date</th>
-                    <th>Appointment Time</th>
+                    <th>Date</th>
+                    <th>Time Slot</th>
                     <th>Status</th>
+                    <th>Payment</th>
+                    <th>Created On</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -154,23 +156,17 @@ export default function Bookings() {
                   {bookings.map((booking) => (
                     <tr key={booking.id}>
                       <td>{booking.patientName}</td>
-                      <td>{new Date(booking.appointmentDate).toLocaleDateString()}</td>
-                      <td>{booking.appointmentTime}</td>
+                      <td>{new Date(booking.date).toLocaleDateString()}</td>
+                      <td>{booking.timeSlot}</td>
                       <td>{booking.status}</td>
+                      <td>{booking.paymentStatus}</td>
+                      <td>{new Date(booking.createdAt).toLocaleDateString()}</td>
                       <td>
                         <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() => handleViewDetails(booking)}
-                            className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
-                            title="View Details"
-                          >
+                          <button onClick={() => handleViewDetails(booking)} className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition" title="View Details">
                             <Eye className="h-4 w-4" />
                           </button>
-                          <button
-                            onClick={() => handleDelete(booking)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                            title="Delete Appointment"
-                          >
+                          <button onClick={() => handleDelete(booking)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete Appointment">
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
@@ -199,19 +195,16 @@ export default function Bookings() {
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-2xl font-bold text-gray-900">Appointment Details</h2>
-              <button onClick={() => setShowDetailsModal(false)} className="text-gray-400 hover:text-gray-600 transition">
-                ×
-              </button>
+              <button onClick={() => setShowDetailsModal(false)} className="text-gray-400 hover:text-gray-600 transition">×</button>
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div><p className="text-sm font-medium text-gray-500">Patient Name</p><p className="text-lg text-gray-900">{selectedBooking.patientName}</p></div>
                 <div><p className="text-sm font-medium text-gray-500">Phone Number</p><p className="text-lg text-gray-900">{selectedBooking.phoneNumber}</p></div>
-                <div><p className="text-sm font-medium text-gray-500">Age</p><p className="text-gray-900">{selectedBooking.age}</p></div>
-                <div><p className="text-sm font-medium text-gray-500">Gender</p><p className="text-gray-900">{selectedBooking.gender}</p></div>
-                <div><p className="text-sm font-medium text-gray-500">Appointment Date</p><p className="text-gray-900">{new Date(selectedBooking.appointmentDate).toLocaleDateString()}</p></div>
-                <div><p className="text-sm font-medium text-gray-500">Appointment Time</p><p className="text-gray-900">{selectedBooking.appointmentTime}</p></div>
+                <div><p className="text-sm font-medium text-gray-500">Date</p><p className="text-gray-900">{new Date(selectedBooking.date).toLocaleDateString()}</p></div>
+                <div><p className="text-sm font-medium text-gray-500">Time</p><p className="text-gray-900">{selectedBooking.timeSlot}</p></div>
                 <div><p className="text-sm font-medium text-gray-500">Status</p><p className="text-lg text-gray-900">{selectedBooking.status}</p></div>
+                <div><p className="text-sm font-medium text-gray-500">Payment</p><p className="text-lg text-gray-900">{selectedBooking.paymentStatus}</p></div>
               </div>
               <div><p className="text-sm font-medium text-gray-500">Address</p><p className="text-gray-900">{selectedBooking.address}</p></div>
             </div>

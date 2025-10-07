@@ -30,8 +30,8 @@ export const authApi = {
 };
 
 export const userApi = {
-    // GET /api/users
-    getAll: () => api.get('/users'),
+    // GET /api/admin/patients
+    getAll: () => api.get('/admin/patients'),
 };
 
 export const appointmentApi = {
