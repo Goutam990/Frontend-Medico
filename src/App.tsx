@@ -1,31 +1,32 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import AdminDashboard from './pages/admin/Dashboard';
 import Patients from './pages/admin/Patients';
 import Bookings from './pages/admin/Bookings';
+import PatientDashboard from './pages/patient/Dashboard';
+import MyBookings from './pages/patient/MyBookings';
 import Profile from './pages/patient/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Disabling unsupported pages
-// import PatientDashboard from './pages/patient/Dashboard';
-// import MyBookings from './pages/patient/MyBookings';
-// import AdminDashboard from './pages/admin/Dashboard';
-// import CalendarView from './pages/admin/CalendarView';
-// import Settings from './pages/admin/Settings';
-
 export const router = createBrowserRouter([
+  // Public routes
+  { path: '/login', element: <Login /> },
+  { path: '/register', element: <Register /> },
+
+  // Admin / Doctor routes
   {
-    path: '/login',
-    element: <Login />,
-  },
-  {
-    path: '/register',
-    element: <Register />,
+    path: '/admin/dashboard',
+    element: (
+      <ProtectedRoute requireDoctor>
+        <AdminDashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/admin/patients',
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requireDoctor>
         <Patients />
       </ProtectedRoute>
     ),
@@ -33,25 +34,39 @@ export const router = createBrowserRouter([
   {
     path: '/admin/bookings',
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requireDoctor>
         <Bookings />
+      </ProtectedRoute>
+    ),
+  },
+
+  // Patient routes
+  {
+    path: '/patient/dashboard',
+    element: (
+      <ProtectedRoute requirePatient>
+        <PatientDashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/patient/bookings',
+    element: (
+      <ProtectedRoute requirePatient>
+        <MyBookings />
       </ProtectedRoute>
     ),
   },
   {
     path: '/patient/profile',
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute requirePatient>
         <Profile />
       </ProtectedRoute>
     ),
   },
-  {
-    path: '/',
-    element: <Navigate to="/login" replace />,
-  },
-  {
-    path: '*',
-    element: <Navigate to="/login" replace />,
-  },
+
+  // Fallback and default routes
+  { path: '/', element: <Navigate to="/login" replace /> },
+  { path: '*', element: <Navigate to="/login" replace /> },
 ]);

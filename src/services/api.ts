@@ -35,8 +35,11 @@ export const userApi = {
 };
 
 export const appointmentApi = {
-  // GET /api/appointments
-  getAll: () => api.get('/appointments'),
+  // GET /api/admin/appointments (For Admin)
+  getAllForAdmin: () => api.get('/admin/appointments'),
+
+  // GET /api/patient/appointments/upcoming (For Patient)
+  getPatientUpcoming: () => api.get('/patient/appointments/upcoming'),
 
   // POST /api/appointments
   create: (appointmentData: any) => api.post('/appointments', appointmentData),

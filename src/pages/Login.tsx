@@ -8,7 +8,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, isDoctor } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,7 +16,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      await login(email, password);
+      const loggedInUser = await login(email, password);
 
       Swal.fire({
         icon: 'success',
@@ -27,7 +27,11 @@ export default function Login() {
       });
 
       setTimeout(() => {
-        navigate(isDoctor ? '/admin/dashboard' : '/patient/dashboard');
+        if (loggedInUser.role === 'Doctor') {
+          navigate('/admin/bookings');
+        } else {
+          navigate('/patient/bookings');
+        }
       }, 1500);
     } catch (error: any) {
       Swal.fire({

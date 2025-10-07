@@ -38,7 +38,7 @@ export default function Bookings() {
 
   const loadBookings = async () => {
     try {
-      const response = await appointmentApi.getAll();
+      const response = await appointmentApi.getAllForAdmin();
       setBookings(response.data);
     } catch (error) {
       console.error('Error loading bookings:', error);
