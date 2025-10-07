@@ -14,8 +14,8 @@ export default function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { isAuthenticated, isDoctor, isPatient, isLoading } = useAuth();
 
-  // First, handle the loading state. While isLoading is true, we cannot make
-  // a decision about authentication. This prevents the redirect loop.
+  // First, handle the loading state. This is the critical fix to prevent
+  // the component from redirecting before the auth status is known.
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -25,12 +25,11 @@ export default function ProtectedRoute({
   }
 
   // Once loading is complete, we can safely check for authentication.
-  // If the user is not authenticated, redirect them to the login page.
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // If the user is authenticated, check for role-specific access.
+  // If the user is authenticated, check for role-based access.
   if (requireDoctor && !isDoctor) {
     return <Navigate to="/patient/bookings" replace />;
   }
