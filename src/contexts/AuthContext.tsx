@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 import { authApi } from '../services/api';
 import type { User } from '../types';
 
@@ -45,16 +45,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  const value = {
-    user,
-    token,
-    login,
-    logout,
-    isLoading,
-    isAuthenticated: !!user && !!token,
-    isDoctor: user?.role === 'Doctor',
-    isPatient: user?.role === 'Patient',
-  };
+  const value = useMemo(
+    () => ({
+      user,
+      token,
+      login,
+      logout,
+      isLoading,
+      isAuthenticated: !!user && !!token,
+      isDoctor: user?.role === 'Doctor',
+      isPatient: user?.role === 'Patient',
+    }),
+    [user, token, isLoading]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
