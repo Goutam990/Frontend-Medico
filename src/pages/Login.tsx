@@ -27,7 +27,8 @@ export default function Login() {
       });
 
       setTimeout(() => {
-        if (loggedInUser.role === 'Doctor') {
+        // Redirect based on the role from the API response
+        if (loggedInUser.role === 'Admin' || loggedInUser.role === 'Doctor') {
           navigate('/admin/bookings');
         } else {
           navigate('/patient/bookings');
