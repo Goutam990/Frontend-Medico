@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Register from './pages/Register';
 import MyBookings from './pages/patient/MyBookings';
+import BookAppointment from './pages/patient/BookAppointment';
 import Profile from './pages/patient/Profile';
 import Patients from './pages/admin/Patients';
 import Bookings from './pages/admin/Bookings';
@@ -23,6 +24,7 @@ function App() {
 
         {/* Protected Routes */}
         <Route path="/patient/bookings" element={<ProtectedRoute requirePatient><MyBookings /></ProtectedRoute>} />
+        <Route path="/patient/book-appointment" element={<ProtectedRoute requirePatient><BookAppointment /></ProtectedRoute>} />
         <Route path="/patient/profile" element={<ProtectedRoute requirePatient><Profile /></ProtectedRoute>} />
         <Route path="/admin/patients" element={<ProtectedRoute requireDoctor><Patients /></ProtectedRoute>} />
         <Route path="/admin/bookings" element={<ProtectedRoute requireDoctor><Bookings /></ProtectedRoute>} />
