@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useMemo, useCallback } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 import { authApi } from '../services/api';
 import type { User } from '../types';
 
@@ -15,8 +15,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Initialize state synchronously from localStorage. This removes the need for a
-  // useEffect and isLoading state, which was the source of the redirect loop.
+  // Initialize state synchronously from localStorage to prevent race conditions.
   const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem('user');
     return storedUser ? JSON.parse(storedUser) : null;
@@ -42,6 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  // useMemo ensures that the context value object is stable and only changes when
+  // its dependencies change, preventing unnecessary re-renders.
   const value = useMemo(
     () => ({
       user,
@@ -49,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       isAuthenticated: !!user && !!token,
-      isDoctor: user?.role === 'Doctor',
+      isDoctor: user?.role === 'Admin' || user?.role === 'Doctor', // Assuming Admin is also a Doctor role
       isPatient: user?.role === 'Patient',
     }),
     [user, token, login, logout]

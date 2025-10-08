@@ -9,7 +9,7 @@ const api = axios.create({
   },
 });
 
-// Add a request interceptor to include the token in headers for all protected API calls
+// Add a request interceptor to include the JWT token in the headers of protected requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -19,36 +19,26 @@ api.interceptors.request.use((config) => {
 });
 
 export const authApi = {
-  // POST /api/auth/register
   register: (userData: any) => api.post('/auth/register', userData),
-
-  // POST /api/auth/login
   login: (credentials: any) => api.post('/auth/login', credentials),
-
-  // POST /api/auth/logout
   logout: () => api.post('/auth/logout'),
 };
 
 export const userApi = {
-    // GET /api/admin/patients
-    getAll: () => api.get('/admin/patients'),
+  getAll: () => api.get('/users'),
 };
 
 export const appointmentApi = {
-  // GET /api/admin/appointments (For Admin)
-  getAllForAdmin: () => api.get('/admin/appointments'),
-
-  // GET /api/patient/appointments/upcoming (For Patient)
-  getPatientUpcoming: () => api.get('/patient/appointments/upcoming'),
-
-  // POST /api/appointments
+  getAll: () => api.get('/appointments'),
   create: (appointmentData: any) => api.post('/appointments', appointmentData),
-
-  // PUT /api/appointments/{id}
   update: (id: string, appointmentData: any) => api.put(`/appointments/${id}`, appointmentData),
-
-  // DELETE /api/appointments/{id}
   delete: (id: string) => api.delete(`/appointments/${id}`),
+  confirm: (data: any) => api.post('/booking/confirm', data),
+};
+
+export const paymentApi = {
+  createIntent: (data: any) => api.post('/payment/create-intent', data),
+  refund: (paymentIntentId: string) => api.post(`/payment/${paymentIntentId}/refund`),
 };
 
 export default api;
