@@ -5,7 +5,6 @@ import { appointmentApi } from '../../services/api';
 
 export default function BookAppointment() {
   const navigate = useNavigate();
-  const [doctorName, setDoctorName] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +16,8 @@ export default function BookAppointment() {
     setIsSubmitting(true);
 
     try {
-      await appointmentApi.create({ doctorName, date, time });
+      // Hardcode the doctor name since there is only one
+      await appointmentApi.create({ doctorName: 'Admin Doctor', date, time });
       navigate('/patient/bookings');
     } catch (err) {
       setError('Failed to book appointment. Please try again.');
@@ -34,22 +34,6 @@ export default function BookAppointment() {
         <div className="max-w-lg mx-auto">
           <h1 className="text-3xl font-bold text-gray-900">Book New Appointment</h1>
           <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-            <div>
-              <label htmlFor="doctor" className="block text-sm font-medium text-gray-700">
-                Doctor Name
-              </label>
-              <div className="mt-1">
-                <input
-                  id="doctor"
-                  name="doctor"
-                  type="text"
-                  required
-                  value={doctorName}
-                  onChange={(e) => setDoctorName(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-            </div>
             <div>
               <label htmlFor="date" className="block text-sm font-medium text-gray-700">
                 Date
