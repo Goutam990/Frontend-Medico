@@ -14,16 +14,16 @@ export interface User {
 export interface Appointment {
   id: string;
   patientName: string;
-  appointmentDate: string;
-  startTime: string;
-  endTime: string;
-  status: 'Pending' | 'Confirmed' | 'Cancelled' | 'Completed';
+  doctorName: string;
+  date: string;
+  time: string;
+  status: 'Pending' | 'Confirmed' | 'Cancelled' | 'Completed' | 'Booked' | 'Approved' | 'Rejected';
   // Optional detailed fields
   age?: number;
   gender?: string;
   address?: string;
   paymentIntentId?: string;
-  paymentStatus?: 'Paid' | 'Unpaid' | 'Refunded';
+  paymentStatus?: 'Paid' | 'Unpaid' | 'Refunded' | 'Pending';
 }
 
 // Represents the availability of a doctor for a specific date

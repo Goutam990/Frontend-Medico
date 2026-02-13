@@ -30,6 +30,7 @@ export const userApi = {
 
 export const appointmentApi = {
   getAll: () => api.get('/appointments'),
+  getForPatient: (patientId: string) => api.get(`/appointments/${patientId}`),
   create: (appointmentData: any) => api.post('/appointments', appointmentData),
   update: (id: string, appointmentData: any) => api.put(`/appointments/${id}`, appointmentData),
   delete: (id: string) => api.delete(`/appointments/${id}`),
